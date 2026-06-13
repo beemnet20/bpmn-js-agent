@@ -1,0 +1,310 @@
+/* ==========================================================================
+   diagram-js overrides — context pad, direct editing, popup, palette
+   ========================================================================== */
+
+.djs-context-pad .entry {
+  box-shadow: none !important;
+  padding: 5px!important;
+  width: auto!important;
+  height: auto!important;
+  border: 1px solid hsl(225, 10%, 65%) !important;
+}
+
+.dark .djs-context-pad .entry {
+  background: hsl(225, 10%, 18%) !important;
+}
+
+.dark .djs-direct-editing-content {
+  background: hsl(225, 10%, 18%) !important;
+  border: 1px solid hsl(225, 10%, 65%) !important;
+}
+
+.dark .djs-visual circle,
+.dark .djs-visual rect,
+.dark .djs-visual ellipse,
+.dark .djs-visual polygon,
+.dark .djs-visual path:not([fill="none"]) {
+    fill: hsl(225, 10%, 18%) !important;
+    stroke: hsl(225, 10%, 65%) !important;
+}
+
+.djs-direct-editing-editing {
+    border-radius: 1rem 1rem 0 0 !important;
+}
+
+.djs-popup {
+    border-radius: 5px;
+}
+.djs-popup-search input {
+    border-radius: 5px;
+    border: 1px solid hsl(225, 10%, 65%) !important;
+}
+
+.dark .djs-popup,
+.dark .djs-popup-search input:focus {
+    background: hsl(225, 10%, 18%) !important;
+    border: 1px solid hsl(225, 10%, 65%) !important;
+}
+
+.dark .djs-popup-search-icon {
+    filter: invert(100%);
+}
+
+.dark .djs-popup .entry.selected {
+    color: hsl(0, 75%, 3%) !important;
+}
+
+.djs-palette {
+    display: none !important;
+}
+
+
+/* ==========================================================================
+   bpmn-js dark theme — CSS variable overrides + SVG shape overrides
+   Scoped to .dark to integrate with Tailwind / shadcn dark mode.
+
+   Shape fill/stroke is primarily driven by JS config:
+     new BpmnModeler({ bpmnRenderer: {
+       defaultFillColor: 'hsl(225, 10%, 18%)',
+       defaultStrokeColor: 'hsl(225, 10%, 65%)',
+     }})
+   The CSS rules below are a safety net for shapes not covered by the renderer.
+   ========================================================================== */
+
+/* --- CSS variable overrides for .bjs-container chrome -------------------- */
+
+.dark .bjs-container {
+  --color-grey-225-10-15: hsl(225, 10%, 90%);
+  --color-grey-225-10-35: hsl(225, 10%, 70%);
+  --color-grey-225-10-55: hsl(225, 10%, 55%);
+  --color-grey-225-10-75: hsl(225, 10%, 30%);
+  --color-grey-225-10-80: hsl(225, 10%, 25%);
+  --color-grey-225-10-85: hsl(225, 10%, 22%);
+  --color-grey-225-10-90: hsl(225, 10%, 18%);
+  --color-grey-225-10-95: hsl(225, 10%, 15%);
+  --color-grey-225-10-97: hsl(225, 10%, 13%);
+
+  --color-blue-205-100-45: hsl(205, 100%, 55%);
+  --color-blue-205-100-45-opacity-30: hsla(205, 100%, 55%, 30%);
+  --color-blue-205-100-50: hsl(205, 100%, 60%);
+  --color-blue-205-100-95: hsl(205, 100%, 15%);
+
+  --color-white: hsl(225, 10%, 13%);
+  --color-black: hsl(0, 0%, 90%);
+  --color-black-opacity-05: hsla(0, 0%, 100%, 5%);
+  --color-black-opacity-10: hsla(0, 0%, 100%, 10%);
+
+  --breadcrumbs-item-color: var(--color-blue-205-100-50);
+  --breadcrumbs-arrow-color: var(--color-black);
+
+  --drilldown-fill-color: hsl(225, 10%, 13%);
+  --drilldown-background-color: var(--color-blue-205-100-50);
+}
+
+/* --- Canvas background --------------------------------------------------- */
+
+.dark .djs-container > svg {
+  background-color: hsl(225, 10%, 13%);
+}
+
+/* --- Default shape fill / stroke ----------------------------------------- */
+
+.dark .djs-element .djs-visual > rect,
+.dark .djs-element .djs-visual > circle,
+.dark .djs-element .djs-visual > ellipse,
+.dark .djs-element .djs-visual > polygon,
+.dark .djs-element .djs-visual > path:not([fill="none"]) {
+  fill: hsl(225, 10%, 18%);
+  stroke: hsl(225, 10%, 65%);
+}
+
+/* --- Labels -------------------------------------------------------------- */
+
+.dark .djs-element .djs-label,
+.dark .djs-element text,
+.dark .djs-element tspan {
+  fill: hsl(225, 10%, 88%) !important;
+  stroke: none !important;
+}
+
+/* --- Sequence flows and connections -------------------------------------- */
+
+.dark .djs-connection .djs-visual > path {
+  stroke: hsl(225, 10%, 65%) !important;
+}
+
+.dark .djs-element marker polygon,
+.dark .djs-element marker path {
+  fill: hsl(225, 10%, 65%) !important;
+  stroke: hsl(225, 10%, 65%) !important;
+}
+
+.dark .djs-element .djs-visual polyline {
+  stroke: hsl(225, 10%, 55%) !important;
+}
+
+/* --- Participant / Pool / Lane ------------------------------------------- */
+
+.dark .djs-shape[data-element-id*="Participant"] .djs-visual > rect,
+.dark .djs-shape[data-element-id*="Lane"] .djs-visual > rect {
+  fill: hsl(225, 10%, 15%) !important;
+  stroke: hsl(225, 10%, 40%) !important;
+}
+
+.dark .djs-shape[data-element-id*="Participant"] .djs-visual > text,
+.dark .djs-shape[data-element-id*="Lane"] .djs-visual > text {
+  fill: hsl(225, 10%, 88%) !important;
+}
+
+/* --- Sub-process (collapsed) --------------------------------------------- */
+
+.dark .djs-shape .djs-visual .djs-subprocess-marker rect {
+  fill: hsl(225, 10%, 22%) !important;
+  stroke: hsl(225, 10%, 50%) !important;
+}
+
+/* --- Text annotation ----------------------------------------------------- */
+
+.dark .djs-shape[data-element-id*="TextAnnotation"] .djs-visual > path,
+.dark .djs-shape[data-element-id*="TextAnnotation"] .djs-visual > rect {
+  fill: hsl(225, 10%, 16%) !important;
+  stroke: hsl(225, 10%, 45%) !important;
+}
+
+.dark .djs-connection[data-element-id*="Association"] .djs-visual > path {
+  stroke: hsl(225, 10%, 50%) !important;
+}
+
+/* --- Data objects -------------------------------------------------------- */
+
+.dark .djs-shape[data-element-id*="DataObject"] .djs-visual > path,
+.dark .djs-shape[data-element-id*="DataStore"] .djs-visual > path,
+.dark .djs-shape[data-element-id*="DataInput"] .djs-visual > path,
+.dark .djs-shape[data-element-id*="DataOutput"] .djs-visual > path {
+  fill: hsl(225, 10%, 18%) !important;
+  stroke: hsl(225, 10%, 55%) !important;
+}
+
+/* --- Group element ------------------------------------------------------- */
+
+.dark .djs-shape[data-element-id*="Group"] .djs-visual > rect {
+  fill: none !important;
+  stroke: hsl(225, 10%, 40%) !important;
+  stroke-dasharray: 10, 5 !important;
+}
+
+/* --- Breadcrumbs --------------------------------------------------------- */
+
+.dark .bjs-breadcrumbs li a,
+.dark .bjs-breadcrumbs li {
+  color: hsl(225, 10%, 75%);
+}
+
+.dark .bjs-breadcrumbs li:last-of-type a {
+  color: hsl(225, 10%, 88%);
+}
+
+
+/* ==========================================================================
+   Interaction states — drag, drop, resize, hover
+   bpmnRenderer config cannot reach these because shapeStyle() hardcodes
+   fill:'white' as the base default, bypassing defaultFillColor.
+   ========================================================================== */
+
+/* --- Drag (element being dragged) ---------------------------------------- */
+
+.dark .djs-dragging .djs-visual > rect,
+.dark .djs-dragging .djs-visual > circle,
+.dark .djs-dragging .djs-visual > ellipse,
+.dark .djs-dragging .djs-visual > polygon,
+.dark .djs-dragging .djs-visual > path:not([fill="none"]) {
+  fill: hsl(225, 10%, 18%) !important;
+  stroke: hsl(225, 10%, 65%) !important;
+}
+
+.dark .djs-dragging .djs-visual text,
+.dark .djs-dragging .djs-visual tspan {
+  fill: hsl(225, 10%, 88%) !important;
+  stroke: none !important;
+}
+
+/* --- Drag ghost (.djs-dragger) ------------------------------------------- */
+
+.dark .djs-dragger * {
+  stroke: hsl(205, 100%, 60%) !important;
+}
+
+.dark .djs-dragger tspan,
+.dark .djs-dragger text {
+  fill: hsl(205, 100%, 60%) !important;
+}
+
+.dark .djs-dragger marker circle,
+.dark .djs-dragger marker path,
+.dark .djs-dragger marker polygon,
+.dark .djs-dragger marker polyline,
+.dark .djs-dragger marker rect {
+  fill: hsl(205, 100%, 60%) !important;
+  stroke: none !important;
+}
+
+/* --- Drop targets -------------------------------------------------------- */
+
+.dark .djs-shape.new-parent .djs-visual > :nth-child(1) {
+  fill: hsl(225, 10%, 25%) !important;
+}
+
+.dark .djs-shape.connect-ok .djs-visual > :nth-child(1) {
+  fill: hsl(225, 10%, 25%) !important;
+}
+
+.dark .djs-shape.drop-not-ok .djs-visual > :nth-child(1),
+.dark .djs-shape.connect-not-ok .djs-visual > :nth-child(1) {
+  fill: hsl(360, 100%, 12%) !important;
+}
+
+.dark .djs-container svg.new-parent {
+  background: hsl(225, 10%, 18%) !important;
+}
+
+.dark .djs-container svg.drop-not-ok {
+  background: hsl(360, 100%, 10%) !important;
+}
+
+/* --- Resize preview ------------------------------------------------------ */
+
+.dark .djs-shape.djs-resizing .djs-visual > rect,
+.dark .djs-shape.djs-resizing .djs-visual > circle,
+.dark .djs-shape.djs-resizing .djs-visual > polygon,
+.dark .djs-shape.djs-resizing .djs-visual > path:not([fill="none"]) {
+  fill: hsl(225, 10%, 18%) !important;
+  stroke: hsl(225, 10%, 65%) !important;
+}
+
+/* --- Hover --------------------------------------------------------------- */
+
+.dark .djs-element:not(.djs-connection):hover .djs-visual > rect,
+.dark .djs-element:not(.djs-connection):hover .djs-visual > circle,
+.dark .djs-element:not(.djs-connection):hover .djs-visual > polygon,
+.dark .djs-element:not(.djs-connection):hover .djs-visual > path:not([fill="none"]) {
+  stroke: hsl(205, 100%, 60%) !important;
+}
+
+/* --- Attach indicator ---------------------------------------------------- */
+
+.dark .djs-element.attach-ok .djs-visual > :nth-child(1) {
+  fill: hsl(225, 10%, 18%) !important;
+}
+
+/* --- Lasso selection box ------------------------------------------------- */
+
+.dark .djs-lasso-overlay {
+  fill: hsla(205, 100%, 60%, 15%) !important;
+  stroke: hsl(205, 100%, 60%) !important;
+}
+
+/* --- Space tool crosshair ------------------------------------------------ */
+
+.dark .djs-crosshair {
+  stroke: hsl(0, 0%, 80%) !important;
+}
