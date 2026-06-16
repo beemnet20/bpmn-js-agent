@@ -5,7 +5,9 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable"
-import { BpmnEditor } from "./components/bpmn-editor"
+import { BpmnEditor } from "@/components/bpmn-editor"
+
+import { BpmnSourceViewer } from "@/components/bpmn-source-viewer"
 
 export function App() {
   return (
@@ -13,7 +15,19 @@ export function App() {
       <Navbar />
       <main className="flex-1">
         <ResizablePanelGroup className="min-h-[calc(100vh-56px)]" orientation="vertical">
-          <ResizablePanel defaultSize="50%" maxSize="75%"><BpmnEditor /></ResizablePanel>
+          <ResizablePanel defaultSize="50%" maxSize="75%">
+            
+            <ResizablePanelGroup orientation="horizontal">
+              <ResizablePanel defaultSize="80%" maxSize="90%">
+                <BpmnEditor />
+              </ResizablePanel>
+              <ResizableHandle withHandle/>
+              <ResizablePanel defaultSize="20%" maxSize="90%">
+                <BpmnSourceViewer />
+              </ResizablePanel>
+            </ResizablePanelGroup>
+            
+            </ResizablePanel>
           <ResizableHandle withHandle/>
           <ResizablePanel defaultSize="50%" maxSize="70%">
             <ChatWindow />

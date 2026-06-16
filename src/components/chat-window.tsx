@@ -216,7 +216,7 @@ export function ChatWindow(): React.JSX.Element {
               ? "Answer the follow-up question…"
               : "Describe a process to generate a BPMN diagram… (Enter to send)"
           }
-          className="resize-none p-3"
+          className="resize-none p-4"
           value={currentMessage}
           onChange={(e) => setCurrentMessage(e.target.value)}
           onKeyDown={handleKeyDown}
