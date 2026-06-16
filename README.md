@@ -15,3 +15,29 @@ The supported models are gemma-4-e2b and gemma-4-e4b. The app downloads the sele
 
 You can access the [live demo here](https://beemnet20.github.io/bpmn-js-agent). 
 
+## Development
+
+### Prerequisites
+
+- [Node.js](https://nodejs.org/) (v18 or later)
+- npm
+
+### Setup
+
+Clone the repository and install dependencies:
+
+```bash
+git clone https://github.com/beemnet20/bpmn-js-agent.git
+cd bpmn-js-agent
+npm install
+```
+
+### Running locally
+
+```bash
+npm run dev
+```
+
+The app will be available at `http://localhost:5173`.
+
+
