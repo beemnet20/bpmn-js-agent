@@ -5,7 +5,7 @@ import { BpmnXmlViewer } from "./bpmn-xml-viewer";
 export function BpmnSourceViewer(){
 
     return (
-        <Tabs defaultValue="account" className="w-full p-2 bg-secondary h-full">
+        <Tabs defaultValue="account" className="w-full p-2  h-full">
             <TabsList>
                 <TabsTrigger value="account">Json</TabsTrigger>
                 <TabsTrigger value="password">XML</TabsTrigger>
