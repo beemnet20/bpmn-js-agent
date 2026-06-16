@@ -2,6 +2,8 @@ import type { Engine } from "@litert-lm/core"
 import {
   UNDERSTANDING_SYSTEM_PROMPT,
   GENERATION_SYSTEM_PROMPT,
+  EDIT_SYSTEM_PROMPT,
+  QUERY_SYSTEM_PROMPT,
   type ProcessUnderstanding,
 } from "@/lib/bpmn-prompts"
 import type { BpmnProcess } from "@/lib/bpmn-schema"
@@ -43,10 +45,9 @@ function parseUnderstanding(text: string): ProcessUnderstanding {
       return {
         intent: "question",
         reply: "I can only respond in English. Please ask again in English.",
-        lanes: [],
         steps: [],
         flows: [],
-        followUpQuestion: "none",
+        followUpQuestion: null,
       }
     }
 
@@ -57,10 +58,9 @@ function parseUnderstanding(text: string): ProcessUnderstanding {
         intent: "question",
         reply:
           "I can only generate process diagrams in English. Please describe the process in English.",
-        lanes: [],
         steps: [],
         flows: [],
-        followUpQuestion: "none",
+        followUpQuestion: null,
       }
     }
 
@@ -69,10 +69,9 @@ function parseUnderstanding(text: string): ProcessUnderstanding {
     return {
       intent: "question",
       reply: "I can only respond in English. Please ask again in English.",
-      lanes: [],
       steps: [],
       flows: [],
-      followUpQuestion: "none",
+      followUpQuestion: null,
     }
   }
 }
@@ -144,10 +143,6 @@ export class GenerationAgent {
     this.engine = engine
   }
 
-  /**
-   * Generate BPMN process from structured understanding.
-   * Returns the generated process JSON (for storage) and basic XML (layout applied in viewer).
-   */
   async generate(understood: ProcessUnderstanding): Promise<{ process: BpmnProcess; xml: string }> {
     const conv = await this.engine.createConversation({
       preface: {
@@ -163,14 +158,66 @@ export class GenerationAgent {
       .replace(/```\s*$/i, "")
       .trim()
 
-    // Parse the JSON schema
     const process = JSON.parse(rawJson) as BpmnProcess
     console.log("[GenerationAgent] Generated process JSON:", process)
 
-    // Convert to XML (layout will be applied in BpmnEditor)
     const xml = jsonToXml(process)
     console.log("[GenerationAgent] Converted to XML:", xml)
 
     return { process, xml }
+  }
+}
+
+export class EditAgent {
+  private engine: Engine
+
+  constructor(engine: Engine) {
+    this.engine = engine
+  }
+
+  async edit(currentProcess: BpmnProcess, changeRequest: string): Promise<{ process: BpmnProcess; xml: string }> {
+    const conv = await this.engine.createConversation({
+      preface: {
+        messages: [{ role: "system", content: EDIT_SYSTEM_PROMPT }],
+      },
+    })
+    const response = await conv.sendMessage({
+      role: "user",
+      content: `Current process:\n${JSON.stringify(currentProcess, null, 2)}\n\nChange request: ${changeRequest}`,
+    })
+    const rawJson = extractText(response)
+      .replace(/^```[a-z]*\n?/i, "")
+      .replace(/```\s*$/i, "")
+      .trim()
+
+    const process = JSON.parse(rawJson) as BpmnProcess
+    console.log("[EditAgent] Updated process JSON:", process)
+
+    const xml = jsonToXml(process)
+    return { process, xml }
+  }
+}
+
+export class QueryAgent {
+  private engine: Engine
+
+  constructor(engine: Engine) {
+    this.engine = engine
+  }
+
+  async answer(currentProcess: BpmnProcess, question: string): Promise<string> {
+    const conv = await this.engine.createConversation({
+      preface: {
+        messages: [{
+          role: "system",
+          content: `${QUERY_SYSTEM_PROMPT}\n\nCurrent diagram:\n${JSON.stringify(currentProcess, null, 2)}`,
+        }],
+      },
+    })
+    const response = await conv.sendMessage({
+      role: "user",
+      content: question,
+    })
+    return extractText(response)
   }
 }

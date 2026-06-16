@@ -10,7 +10,6 @@ export interface ProcessStep {
     | "exclusiveGateway"
     | "parallelGateway"
     | "inclusiveGateway"
-  lane: string | null
 }
 
 export interface ProcessFlow {
@@ -22,10 +21,9 @@ export interface ProcessFlow {
 export interface ProcessUnderstanding {
   intent: "new_process" | "edit" | "question"
   reply: string | null
-  lanes: string[]
   steps: ProcessStep[]
   flows: ProcessFlow[]
-  followUpQuestion: string | "none"
+  followUpQuestion: string | null
 }
 
 // ============================================================================
@@ -247,10 +245,9 @@ SCHEMA:
 {
   "intent": "new_process" | "edit" | "question",
   "reply": string | null,
-  "lanes": string[],
-  "steps": [{"id": string, "label": string, "type": "startEvent" | "endEvent" | "task" | "userTask" | "serviceTask" | "exclusiveGateway" | "parallelGateway" | "inclusiveGateway", "lane": string | null}],
+  "steps": [{"id": string, "label": string, "type": "startEvent" | "endEvent" | "task" | "userTask" | "serviceTask" | "exclusiveGateway" | "parallelGateway" | "inclusiveGateway"}],
   "flows": [{"from": string, "to": string, "label": string | null}],
-  "followUpQuestion": string | "none"
+  "followUpQuestion": string | null
 }
 
 🚨 EVERY STRING IN THIS JSON MUST BE IN ENGLISH. DO NOT MIX LANGUAGES. 🚨
@@ -266,7 +263,7 @@ RULES:
 - All step IDs must be unique and snake_case (no spaces).
 - Task labels should be clear and concise (2-6 words).
 - Only ask follow-up questions for ambiguous or major process changes.
-- Set followUpQuestion to "none" when you have enough clarity to proceed.
+- Set followUpQuestion to null when you have enough clarity to proceed.
 - ALL TEXT, LABELS, AND REPLIES MUST BE IN ENGLISH. DO NOT RESPOND IN ANY OTHER LANGUAGE.
 `.trim()
 
