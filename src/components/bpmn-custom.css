@@ -1,3 +1,14 @@
+
+.bjs-powered-by { 
+  /* display: none !important;  */
+  position: absolute;
+  bottom: 10px !important;
+  left: 10px !important;
+}
+.bjs-powered-by svg {
+  width: 25px;
+
+}
 /* ==========================================================================
    diagram-js overrides — context pad, direct editing, popup, palette
    ========================================================================== */

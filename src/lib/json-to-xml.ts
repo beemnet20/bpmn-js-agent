@@ -61,19 +61,21 @@ function transformProcess(process: BpmnProcess): TransformedProcess {
     for (let i = 0; i < els.length; i++) {
       const el = els[i]
       const nextEl = els[i + 1]
+      // Skip creating a flow when lastId === el.id: this happens at gateway convergence
+      // points where the gateway handler already created the correct merge flows.
+      const needsFlow = !!lastId && lastId !== el.id
       const element: TransformedElement = {
         id: el.id,
         type: el.type,
         name: el.label,
-        incoming: lastId ? [generateFlowId()] : [],
+        incoming: needsFlow ? [generateFlowId()] : [],
         outgoing: [],
       }
 
-      // Add flow from previous element
-      if (lastId && element.incoming.length > 0) {
+      if (needsFlow && element.incoming.length > 0) {
         flows.push({
           id: element.incoming[0],
-          sourceRef: lastId,
+          sourceRef: lastId!,
           targetRef: el.id,
         })
       }
@@ -151,6 +153,15 @@ function transformProcess(process: BpmnProcess): TransformedProcess {
   }
 
   transformElements(process.elements)
+
+  // Post-pass: rebuild incoming/outgoing on every element directly from flows[].
+  // The transform populates flows[] correctly but can't update a source element's outgoing
+  // until the following element is processed (by which point the source is already in elements[]).
+  // Gateway merge flows also target convergence elements not yet in elements[] at creation time.
+  for (const el of elements) {
+    el.outgoing = flows.filter(f => f.sourceRef === el.id).map(f => f.id)
+    el.incoming = flows.filter(f => f.targetRef === el.id).map(f => f.id)
+  }
 
   console.log("[jsonToXml] transformProcess output - elements:", elements.length, "flows:", flows.length)
   return { elements, flows }

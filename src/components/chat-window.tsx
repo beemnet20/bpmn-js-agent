@@ -16,14 +16,14 @@ import { AlertCircle, CircleStop, ArrowBigUp, Check, Copy } from "lucide-react"
 import { useModelEngine } from "@/components/model-engine-provider.tsx"
 import { ModelSelector } from "@/components/model-selector.tsx"
 import { useProcess } from "@/components/process-provider"
-import { UnderstandingAgent, GenerationAgent } from "@/lib/bpmn-agent"
+import { UnderstandingAgent, GenerationAgent, EditAgent, QueryAgent } from "@/lib/bpmn-agent"
 
 interface Message {
   role: "user" | "assistant"
   content: string
 }
 
-type Phase = "idle" | "understanding" | "generating" | "error"
+type Phase = "idle" | "understanding" | "generating" | "answering"
 
 export function ChatWindow(): React.JSX.Element {
   const { error, engine } = useModelEngine()
@@ -33,7 +33,12 @@ export function ChatWindow(): React.JSX.Element {
   const [phase, setPhase] = React.useState<Phase>("idle")
   const [generationError, setGenerationError] = React.useState<string | null>(null)
 
-  const agentRef = React.useRef<{ understanding: UnderstandingAgent; generation: GenerationAgent } | null>(null)
+  const agentRef = React.useRef<{
+    understanding: UnderstandingAgent
+    generation: GenerationAgent
+    edit: EditAgent
+    query: QueryAgent
+  } | null>(null)
   const abortRef = React.useRef<boolean>(false)
   // track whether we're in the middle of a follow-up loop
   const [awaitingFollowUp, setAwaitingFollowUp] = React.useState<boolean>(false)
@@ -48,11 +53,13 @@ export function ChatWindow(): React.JSX.Element {
       agentRef.current = {
         understanding: new UnderstandingAgent(engine),
         generation: new GenerationAgent(engine),
+        edit: new EditAgent(engine),
+        query: new QueryAgent(engine),
       }
     }
   }, [engine])
 
-  const isGenerating = phase === "understanding" || phase === "generating"
+  const isGenerating = phase !== "idle"
 
   const addMessage = (role: Message["role"], content: string) => {
     setMessages((prev) => [...prev, { role, content }])
@@ -76,21 +83,11 @@ export function ChatWindow(): React.JSX.Element {
     try {
       setPhase("understanding")
 
-      // Pass current process directly to understanding agent (only on first message)
-      const currentProcess = awaitingFollowUp ? undefined : process
-
-      const understood = await agentRef.current.understanding.understand(input, currentProcess)
+      const understood = await agentRef.current.understanding.understand(input, process)
 
       if (abortRef.current) return
 
-      if (understood.intent === "question") {
-        addMessage("assistant", understood.reply ?? "I'm not sure — could you rephrase?")
-        setAwaitingFollowUp(false)
-        setPhase("idle")
-        return
-      }
-
-      if (understood.followUpQuestion && understood.followUpQuestion !== "none") {
+      if (understood.followUpQuestion) {
         addMessage("assistant", understood.followUpQuestion)
         setAwaitingFollowUp(true)
         setPhase("idle")
@@ -98,22 +95,37 @@ export function ChatWindow(): React.JSX.Element {
       }
 
       setAwaitingFollowUp(false)
+
+      if (understood.intent === "question") {
+        setPhase("answering")
+        const answer = await agentRef.current.query.answer(process, input)
+        if (abortRef.current) return
+        addMessage("assistant", answer)
+        setPhase("idle")
+        return
+      }
+
+      if (understood.intent === "edit") {
+        setPhase("generating")
+        addMessage("assistant", "Got it — applying your changes…")
+        const { process: updatedProcess } = await agentRef.current.edit.edit(process, input)
+        if (abortRef.current) return
+        setProcess(updatedProcess)
+        addMessage("assistant", "Done! Your diagram has been updated.")
+        agentRef.current.understanding.notifyDiagramUpdated(updatedProcess).catch(console.error)
+        setPhase("idle")
+        return
+      }
+
+      // "new_process"
       setPhase("generating")
       addMessage("assistant", "Got it — generating your diagram now…")
-
-      const { process: generatedProcess, xml: generatedXml } = await agentRef.current.generation.generate(understood)
-
+      const { process: generatedProcess } = await agentRef.current.generation.generate(understood)
       if (abortRef.current) return
-
-      console.log("[ChatWindow] Generated process:", generatedProcess)
-      console.log("[ChatWindow] Generated XML:", generatedXml)
-
       setProcess(generatedProcess)
       addMessage("assistant", "Done! Your diagram has been updated.")
-      setPhase("idle")
-
-      // Update understanding agent with the new process state
       agentRef.current.understanding.notifyDiagramUpdated(generatedProcess).catch(console.error)
+      setPhase("idle")
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err)
       setGenerationError(msg)
@@ -185,10 +197,10 @@ export function ChatWindow(): React.JSX.Element {
           ))}
         </div>
 
-        {phase === "understanding" && (
+        {(phase === "understanding" || phase === "answering") && (
           <div className="flex items-center gap-2 p-4 text-sm text-muted-foreground">
             <Spinner />
-            <span>Thinking...</span>
+            <span>Thinking…</span>
           </div>
         )}
         {phase === "generating" && (
@@ -216,7 +228,7 @@ export function ChatWindow(): React.JSX.Element {
               ? "Answer the follow-up question…"
               : "Describe a process to generate a BPMN diagram… (Enter to send)"
           }
-          className="resize-none p-3"
+          className="resize-none p-4"
           value={currentMessage}
           onChange={(e) => setCurrentMessage(e.target.value)}
           onKeyDown={handleKeyDown}
