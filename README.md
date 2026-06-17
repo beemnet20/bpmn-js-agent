@@ -15,6 +15,10 @@ The supported models are gemma-4-e2b and gemma-4-e4b. The app downloads the sele
 
 You can access the [live demo here](https://beemnet20.github.io/bpmn-js-agent). 
 
+## Demo
+
+![BPMN JS Agent Demo](demo.gif)
+
 ## Development
 
 ### Prerequisites
